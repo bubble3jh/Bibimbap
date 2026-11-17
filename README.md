@@ -1,46 +1,73 @@
-# Model Bibimbap Ensemble Framework
-![flowchart](/figures/flowchart.png)
+<h1 align="center">Bibimbap: Pre-trained Models Ensemble<br>for Domain Generalization</h1>
 
-This is a Pytorch implementation of the following paper: 
+<p align="center">
+  <b>Pattern Recognition, 2024</b><br>
+  Jinho Kang, Taero Kim, Yewon Kim, Changdae Oh, Jiyoung Jung, Rakwoo Chang, Kyungwoo Song
+</p>
 
-Jinho Kang, Taero Kim, Yewon Kim, Changdae Oh, Jiyoung Jung, Rakwoo Chang, Kyungwoo Song. Bibimbap : Pre-trained models ensemble for Domain Generalization. [Pattern Recognition](https://www.sciencedirect.com/science/article/pii/S0031320324001420?dgcid=coauthor), 2024.
+<p align="center">
+  <a href="https://www.sciencedirect.com/science/article/pii/S0031320324001420"><img src="https://img.shields.io/badge/Paper-ScienceDirect-F36D21" alt="Paper"></a>
+  <a href="https://doi.org/10.1016/j.patcog.2024.110391"><img src="https://img.shields.io/badge/DOI-10.1016%2Fj.patcog.2024.110391-0085CA" alt="DOI"></a>
+  <img src="https://img.shields.io/badge/python-3.8-3776AB?logo=python&logoColor=white" alt="Python 3.8">
+  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch">
+</p>
 
+<p align="center">
+  <img src="figures/flowchart.png" width="90%" alt="Flowchart of the Model Bibimbap ensemble framework">
+</p>
 
-If you make use of the code/experiment in your work, please cite our paper (Bibtex below).
+Official PyTorch implementation of **Model Bibimbap**, a framework that ensembles the weights of fine-tuned
+models and fine-tunes the ensemble once more for robustness under domain shift.
 
-```
-@article{KANG2024110391,
-title = {Bibimbap : Pre-trained models ensemble for Domain Generalization},
-journal = {Pattern Recognition},
-volume = {151},
-pages = {110391},
-year = {2024},
-issn = {0031-3203},
-doi = {https://doi.org/10.1016/j.patcog.2024.110391},
-url = {https://www.sciencedirect.com/science/article/pii/S0031320324001420},
-author = {Jinho Kang and Taero Kim and Yewon Kim and Changdae Oh and Jiyoung Jung and Rakwoo Chang and Kyungwoo Song},
-keywords = {Transfer learning, Molecular classification, Domain generalization, Weight averaging, Ensemble learning, Chemical dataset},
-abstract = {This paper addresses a machine learning problem often challenged by differences in the distributions of training and real-world data. We propose a framework that addresses the problem of underfitting in the ensembling method using pre-trained models and improves the performance and robustness of deep learning models through ensemble diversity. For the naive weight ensembling framework, we discovered that the ensembled models could not lie in the same loss basin under extreme domain shift conditions, suggesting that a loss barrier may exist. We used a fine-tuning step after the weighted ensemble to address the underfitting problem caused by the loss barrier and stabilize the batch normalization running parameters. We also inferred through qualitative analysis that the diversity of ensemble models affects domain generalization. We validate our method on a large-scale image dataset (ImageNet-1K) and chemical molecule data, which is suitable for testing with domain shift problems due to its data-splitting method.}
-}
-```
+- **Why naive weight ensembling underfits.** Under extreme domain shift, the ensembled models may not lie in the
+  same loss basin, and a loss barrier can separate them.
+- **Fine-tune after ensembling.** A fine-tuning step after the weighted ensemble resolves the underfitting caused
+  by the loss barrier and stabilizes the batch normalization statistics.
+- **Diversity matters.** The diversity of the ensembled models affects domain generalization.
+- **Validated on images and molecules.** ImageNet-1K and chemical molecule data, whose splits create strong
+  domain shift.
 
 ## Motivation
 
-When employing ensemble methods like our Bibimbap and [Ratatouille models](https://github.com/facebookresearch/ModelRatatouille), a key challenge is the potential inconsistency in loss landscapes across different models, leading to suboptimal ensemble performance, especially when dealing with significant domain shifts. The toy illustration (Fig. 1) and loss interpolation plot for chemical data (Fig. 2) highlight the existence of loss barriers that can arise from these mismatches and show experimentally that Mode Connectivity may not be guaranteed, highlighting the need for innovative approaches to mitigate these challenges.
+Weight ensembles such as [Model Ratatouille](https://github.com/facebookresearch/ModelRatatouille) assume that the
+models to be averaged share a loss basin. When the domains differ strongly this may not hold, and the averaged
+model can land on a loss barrier.
 
-![Toy Illustration](figures/illustration.png)
+<p align="center">
+  <img src="figures/illustration.png" width="80%" alt="Toy illustration of an ensembled model on a loss barrier">
+</p>
 
-**Fig. 1**: Toy illustration visualizing how an ensembled model could potentially situate itself on a loss barrier under extreme domain shifts, necessitating additional fine-tuning.
+<p align="center"><em>Fig. 1. Under extreme domain shift, the ensembled model can sit on a loss barrier and needs
+additional fine-tuning.</em></p>
 
-![Loss Interpolation](figures/loss_interpolation.png)
+<p align="center">
+  <img src="figures/loss_interpolation.png" width="60%" alt="Loss interpolation between models on chemical data">
+</p>
 
-**Fig. 2**: Loss interpolation plot providing evidence of potential loss barriers between models in the chemical data domain, motivating the research to address these limitations.
+<p align="center"><em>Fig. 2. Loss interpolation on chemical data shows a loss barrier between models, so mode
+connectivity is not guaranteed.</em></p>
 
-## Installation
-We used the following Python packages for core development. We tested on `Python 3.8.15`.
+## Results
+
+<p align="center">
+  <img src="figures/auroc.png" width="60%" alt="AUROC of Bibimbap with and without the final fine-tuning">
+</p>
+
+<p align="center"><em>Fig. 3. AUROC during training (top) and testing (bottom). Transparent curves are the auxiliary
+models of the ensemble.</em></p>
+
+Without the final fine-tuning, Bibimbap starts with a much lower training AUROC, a sign of underfitting. With it,
+both the training and the test AUROC rise considerably, which shows that the fine-tuning overcomes the loss barrier.
+
+## Getting started
+
+### Installation
+
+Tested with Python 3.8.15.
+
 ```
 pytorch                   1.1.0
-torch-cluster             1.6.0             
+torch-cluster             1.6.0
 torch-geometric           2.2.0
 torch-scatter             2.0.9
 torch-sparse              0.6.13
@@ -50,58 +77,66 @@ tqdm                      4.62.3
 tensorboardx              2.5.1
 ```
 
-## Dataset download
-All the necessary data files can be downloaded from the following links.
+### Data
 
-download from [chem data](http://snap.stanford.edu/gnn-pretrain/data/chem_dataset.zip) (2.5GB), unzip it, and put it under `dataset/`.
+Download the [chemistry datasets](http://snap.stanford.edu/gnn-pretrain/data/chem_dataset.zip) (2.5 GB), unzip
+them, and place them under `dataset/`.
 
-## Model Bibimbap strategy
-Model Bibimbap ensembles fine-tuned models in three steps.
+### Running
 
-#### 1. Load pre-trained model and fine-tune
-Under 'model_gin/', there are pre-trained models that are trained in different ways. In INPUT_MODEL_PATH, put the path to the selected model.
+Model Bibimbap builds its ensemble in four steps. `bibimbap.sh` runs the whole pipeline.
 
-```
+**1. Fine-tune a pre-trained model.** `model_gin/` holds models pre-trained in different ways.
+
+```bash
 python finetune.py --input_model_file PRETRAINED_MODEL_PATH --filename OUTPUT_FILENAME --dataset DATASET --epochs EPOCHS
 ```
 
-We can give as a hyperparameter whether to freeze the batch normalization layer when training the model with `--freeze_bn`.
-This step creates a vanilla fine-tuned model from the pretrained model for each datasets.
+Add `--freeze_bn` to freeze the batch normalization layers. This step gives one fine-tuned model per dataset.
 
-#### 2. Linear probing for target dataset
-```
+**2. Linear probing on the target dataset.**
+
+```bash
 python finetune.py --input_model_file PRETRAINED_MODEL_PATH --filename OUTPUT_FILENAME --dataset DATASET --epochs EPOCHS --freeze_gnn
 ```
-In this step, load the pre-trained model in `PRETRAINED_MODEL_PATH` further we run linear probing on the target dataset to obtain weights to replace the linear classifier in the auxiliary model.
 
-#### 3. Auxiliary fine-tune
+The resulting linear classifier replaces the classifier of the auxiliary models in the next step.
+
+**3. Auxiliary fine-tuning.**
+
+```bash
+python finetune.py --input_model_file FINETUNED_MODEL_PATH --replace_classifier LP_MODEL_PATH --dataset DATASET --filename OUTPUT_FILENAME --epochs EPOCHS
 ```
-python3 finetune.py --input_model_file FINETUNED_MODEL_PATH --replace_classifier LP_MODEL_PATH --dataset DATASET --filename OUTPUT_FILENAME --epochs EPOCHS 
 
-```
+`--freeze_bn` is available here as well. We name the outputs `target_${target}_aux_${aux}_${model_ver}`, where
+`target` is the target dataset, `aux` the auxiliary dataset, and `model_ver` a string such as `fr_nfr` that records
+whether batch normalization was frozen in the previous and the current step.
 
-At this stage, you can also use `--freeze_bn` to decide whether to learn or not.
-Also, for ease of experimentation, we used the following form of OUTPUT_FILENAME. `target_${target}_aux_${aux}_${model_ver}`
+**4. Ensemble and final fine-tuning.**
 
-For {target}, we wrote the name of the target dataset, for {aux}, the name of the auxiliary dataset, and {model_ver} the string such as 'fr_nfr', which summarizes whether the model was trained by running freeze_bn in the previous step and the current step.
-
-#### 4. Ensemble and final fine-tune
-```
+```bash
 python finetune.py --averaging_target DATASET --dataset DATASET --averaging_aux AUX_MODELS --epochs EPOCHS --model_ver MODEL_VER --ensemble_method uniform
 ```
 
-`DATASET` should be target dataset, and `AUX_MODELS` should be auxiliary model's names. We added `model_ver` argument parameter for find auxiliary model's directory more easier.
+`DATASET` is the target dataset and `AUX_MODELS` are the names of the auxiliary models. `--freeze_gnn` (features),
+`--freeze_lc` (classifier), and `--freeze_bn` can be combined to find the best model for each dataset. The ensemble
+weights are uniform (`--ensemble_method uniform`), sampled from a Dirichlet distribution
+(`--ensemble_method dirichlet`), or given by hand with `--ens_weight`.
 
-At this stage, we tried a combination of `--freeze_gnn` freezing the features, `--freeze_lc` freezing the classifier, and `--freeze_bn` to find a best performing model for each dataset with hyperparameter tuning.
+## Citation
 
-Furthermroe, we can select ensemble method with `--ensemble_method uniform` or `--ensemble_method dirichelt` and can select ensemble weight manualy with `ens_weight` argument.
+```bibtex
+@article{KANG2024110391,
+  title = {Bibimbap : Pre-trained models ensemble for Domain Generalization},
+  journal = {Pattern Recognition},
+  volume = {151},
+  pages = {110391},
+  year = {2024},
+  issn = {0031-3203},
+  doi = {https://doi.org/10.1016/j.patcog.2024.110391},
+  url = {https://www.sciencedirect.com/science/article/pii/S0031320324001420},
+  author = {Jinho Kang and Taero Kim and Yewon Kim and Changdae Oh and Jiyoung Jung and Rakwoo Chang and Kyungwoo Song}
+}
+```
 
-
-## Qualitative analysis
-
-![Underfitting](figures/auroc.png)
-
-**Fig. 3**: Measurement of AUROC under auxiliary fine-tuning, demonstrating the effectiveness of our approach in mitigating the identified challenges. The top plot shows the train stage, and the bottom plot shows the test stage. The transparent graphs represent the auxiliary models for the Bibimbap ensemble.
-
-The "Bibimbap without Fine-tuning" graph initially shows a significantly lower AUROC in the train stage, indicating an underfitting state. However, after applying our proposed fine-tuning approach, both the train and test plots exhibit a considerable increase in AUROC, highlighting the model's improved performance and ability to overcome the loss barrier challenges.
-
+The lab-maintained copy of this repository is at [MLAI-Yonsei/Bibimbap](https://github.com/MLAI-Yonsei/Bibimbap).
